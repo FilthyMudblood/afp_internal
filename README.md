@@ -15,6 +15,8 @@
 
 中文文档 · [`README.zh-CN.md`](README.zh-CN.md) · Whitepapers · **[v2 Protocol Edition](docs/whitepaper-v2/)** · [v1 on Zenodo](https://zenodo.org/records/20674352)
 
+A short paper on this execution-boundary design was submitted to NeurIPS 2026 Agents in the Wild and was not accepted. The reviews asked for a real planner/tool trace rather than a synthetic mesh; that work is in progress here.
+
 ---
 
 ## The Problem

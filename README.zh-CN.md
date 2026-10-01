@@ -15,6 +15,8 @@
 
 English · [`README.md`](README.md) · 白皮书 · **[v2 协议版](docs/whitepaper-v2/)** · [v1 Zenodo 存档](https://zenodo.org/records/20674352)
 
+关于这一执行边界设计的一篇短文曾投往 NeurIPS 2026 Agents in the Wild，未被录用。审稿要求用真实 planner/tool 轨迹代替合成网格；这部分工作正在本仓库推进。
+
 ---
 
 ## 痛点
