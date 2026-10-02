@@ -1,6 +1,8 @@
 
 
-# Aegis Fabric Protocol (AFP)
+# AFP-Core (enterprise)
+
+GitHub: **Aegis Fabric Protocol**. This tree is the **enterprise / Path A** protocol.
 
 [Docker Publish](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml)
 [GHCR Sidecar](https://ghcr.io/filthymudblood/aegis-fabric-sidecar)
@@ -8,14 +10,16 @@
 [GHCR Demo Agent](https://ghcr.io/filthymudblood/afp-demo-agent)
 [License](LICENSE)
 
-### **The Physical Brakes for Multi-Agent Systems**
+### **The Physical Brakes for Enterprise Multi-Agent Systems**
 
-*Enterprise today · P2P-ready by protocol*
+*Path A: govern your own planners inside an administrative boundary*
 
 > **"TCP governs packets. AFP governs optimizers."**
 > *(TCP 治理数据包，AFP 治理优化器)*
 
-**Aegis Fabric Protocol (AFP)** is a **Consequence Persistence Layer (CPL)** — the missing runtime brake between *agents can talk* and *the mesh survives*. Reference deployments use a Kubernetes-native sidecar; the **protocol** is the same for enterprise multi-agent and open P2P agent meshes.
+**Aegis Fabric Protocol (AFP)** is a **Consequence Persistence Layer (CPL)** for **enterprise agent-to-agent** coordination: an out-of-band runtime brake between *agents can talk* and *this fleet survives*. Reference deployments use a Kubernetes-native sidecar.
+
+Open-mesh neighbor governance (strangers, governance header, identity-bound refuse) is a **sister protocol, written separately** as **AFP-Exchange** (`../AFP-Exchange`). This repository does not implement or evaluate that stack. A node that runs both should still share the allow / delay / isolate letters so the two paths cannot split-brain — that is a shared kernel, not one binary with a mode switch.
 
 中文文档 · [`README.zh-CN.md`](README.zh-CN.md) · Whitepapers · **[v2 Protocol Edition](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)** · [v1 on Zenodo](https://zenodo.org/records/20674352)
 
@@ -38,13 +42,13 @@ Multi-agent stacks solve **planning** (LangGraph, CrewAI) and **messaging** (gRP
 
 | Mode                       | What AFP answers                                                                                    |
 | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Enterprise multi-agent** | Stop runaway planners *inside* the pod—before OOM, token burn, and retry cascades                   |
-| **P2P / open agent mesh**  | Under distrust: admit only physically viable peers; quarantine toxic nodes before contagion spreads |
+| **Enterprise multi-agent** | Stop runaway planners *inside* the pod—before OOM, token burn, and retry cascades |
+| **Open mesh (sister protocol)** | Specified in **AFP-Exchange**, not this repo: admit physically viable strangers; this paper/codebase does not claim that eval |
 
 
 > *Agents learned to talk. Networks learned to route. **Nobody brakes the optimizer before it commits—and remembers when it failed.***
 
-*One protocol, two profiles:* **closed mesh** (mTLS, PreFlight-first) and **open exchange** (GovernanceHeader, CVP, stranger tax). See [Whitepaper §4](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#open-network-topology).
+This repository is **closed mesh / Path A** (mTLS, PreFlight-first). **Open exchange** (GovernanceHeader, CVP, stranger tax) is the sister protocol [AFP-Exchange](../AFP-Exchange), not a mode switch on this sidecar. Whitepaper §4 still records the spec; it is not a claim that this repo ships it.
 
 ### Why agent stacking needs memory
 
@@ -206,7 +210,7 @@ AFP does **not** judge whether an intent is morally or semantically "bad." It bl
 
 Friction applies **before commit**, with **persistent consequences**—so runaway trajectories cannot evade by splitting into syntactically valid micro-steps.
 
-**Primary target is out-of-control stacking**, not semantic "bad intent." In enterprise meshes, that means your own planner chain runaway. In open P2P meshes, add **physically malicious peers**—overload export, contagion—contained by CVP and ingress law, not by reading message meaning.
+**Primary target is out-of-control stacking**, not semantic "bad intent." In this enterprise protocol, that means your own planner chain runaway. Physically malicious strangers (overload export, contagion, identity rotation) belong to **AFP-Exchange**, not to this codebase's claims.
 
 Theory: [Whitepaper v2 §2 — CPL](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#consequence-persistence-layer) · [§3 — Pre-Intent](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement)
 

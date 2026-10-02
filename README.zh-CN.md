@@ -1,4 +1,6 @@
-# Aegis Fabric Protocol (AFP)
+# AFP-Core（企业）
+
+GitHub 仓库名仍是 Aegis Fabric Protocol。本目录是 **企业 / Path A** 协议。
 
 [![Docker Publish](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml)
 [![GHCR Sidecar](https://img.shields.io/badge/GHCR-sidecar-2496ED?logo=docker&logoColor=white)](https://ghcr.io/filthymudblood/aegis-fabric-sidecar)
@@ -6,13 +8,16 @@
 [![GHCR Demo Agent](https://img.shields.io/badge/GHCR-demo--agent-2496ED?logo=docker&logoColor=white)](https://ghcr.io/filthymudblood/afp-demo-agent)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-### **企业级与 P2P Agent 网络的物理刹车片**
-*企业 multi-agent 今日可部署 · 协议层为开放 P2P 就绪*
+### **企业 Agent-to-Agent 的物理刹车片**
+
+*Path A：在行政域内管住自己的 planner*
 
 > **"TCP 治理数据包，AFP 治理优化器"**
 > *(TCP governs packets. AFP governs optimizers.)*
 
-**Aegis Fabric Protocol（AFP）** 是**后果持久层（CPL）**——插在「Agent 能通信」和「系统能存活」之间的那一格**协调运行时**刹车。参考实现为 K8s Sidecar；**协议**对企业 multi-agent 与开放 P2P agent 网络通用。
+**Aegis Fabric Protocol（AFP）** 是面向**企业 agent-to-agent** 的**后果持久层（CPL）**：插在「Agent 能通信」和「这支舰队能存活」之间的运行时刹车。参考实现为 K8s Sidecar。
+
+开放网格下的邻居治理（陌生人、治理头、身份绑定拒绝）是**分开写的姊妹协议 AFP-Exchange**（`../AFP-Exchange`）。本仓库不实现、不评价那一套。双栖节点仍应共用 allow / delay / isolate 字母表，以免 split-brain——那是共享内核，不是一个 sidecar 加开关。
 
 English · [`README.md`](README.md) · 白皮书 · **[v2 Protocol Edition（英文）](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)** · [v1 Zenodo 存档](https://zenodo.org/records/20674352)
 
@@ -32,12 +37,12 @@ Multi-agent 栈解决了**规划**（LangGraph、CrewAI）和**传输**（gRPC�
 
 | 场景 | AFP 回答什么 |
 |------|----------------|
-| **企业 multi-agent** | 在 Pod 内、出网前掐灭 planner 失控 —— 避免 OOM、Token 燃烧、重试雪崩 |
-| **P2P / 开放 agent 网络** | 零信任下：只准入物理上可持续的 peer；有毒节点隔离，防止跨节点传染 |
+| **企业 multi-agent（本仓库）** | 在 Pod 内、出网前掐灭 planner 失控 —— 避免 OOM、Token 燃烧、重试雪崩 |
+| **开放网格（姊妹协议 AFP-Exchange）** | 陌生人准入与身份绑定拒绝：另文另仓库，本仓库不实现、不评价 |
 
 > *Agent 学会了说话，网络学会了路由。**还没有人在优化器提交之前踩刹车，并记住它失控过。***
 
-*一套协议，两种 profile：* **closed mesh**（mTLS，以 PreFlight 为主）与 **open exchange**（GovernanceHeader、CVP、陌生人税）。见[白皮书 §4](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#open-network-topology)。
+本仓库是 **closed mesh / Path A**（mTLS，以 PreFlight 为主）。**open exchange**（GovernanceHeader、CVP、陌生人税）见姊妹协议 [AFP-Exchange](../AFP-Exchange)，不要当成同一个 sidecar 的开关。白皮书 §4 仍保留规格讨论，不等于本仓库已交付。
 
 ### 为什么 Agent 堆叠需要「有记忆」
 
@@ -191,7 +196,7 @@ AFP **不判断** intent 在语义或道德上是否「坏」。它拦截的是*
 
 摩擦在**提交之前**施加，且**后果可持久**——失控轨迹无法靠拆成语法合法的小步来逃避。
 
-**主要对象是堆叠失控**，不是语义上的「坏 intent」。企业网主要是自家 planner 链失控；开放 P2P 网另加**物理恶意 peer**（过载导出、传染）——由 CVP 与入站法则 containment，而非读懂消息含义。
+**主要对象是堆叠失控**，不是语义上的「坏 intent」。本仓库的企业协议管的是自家 planner 链。物理恶意陌生人（过载导出、传染、换马甲）属于 **AFP-Exchange**，不是本仓库的交付主张。
 
 理论全文：[白皮书 v2 §2 CPL](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#consequence-persistence-layer) · [§3 意图前执法](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement)
 

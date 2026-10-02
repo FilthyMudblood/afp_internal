@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "benign",
+    "mode": "off",
+    "task_completed": true,
+    "planner_steps": 3,
+    "preflight_probes": 0,
+    "isolated": false,
+    "block_reason": "",
+    "final_depth": 3,
+    "wall_ms": 2.0,
+    "graph_stop_depth": 3
+  },
+  {
+    "scenario": "benign",
+    "mode": "on",
+    "task_completed": true,
+    "planner_steps": 3,
+    "preflight_probes": 3,
+    "isolated": false,
+    "block_reason": "",
+    "final_depth": 3,
+    "wall_ms": 3.79,
+    "graph_stop_depth": 3
+  },
+  {
+    "scenario": "runaway",
+    "mode": "off",
+    "task_completed": true,
+    "planner_steps": 40,
+    "preflight_probes": 0,
+    "isolated": false,
+    "block_reason": "",
+    "final_depth": 40,
+    "wall_ms": 33.46,
+    "graph_stop_depth": 40
+  },
+  {
+    "scenario": "runaway",
+    "mode": "on",
+    "task_completed": false,
+    "planner_steps": 11,
+    "preflight_probes": 12,
+    "isolated": true,
+    "block_reason": "recursion depth exceeded physical limit, intent loop detected",
+    "final_depth": 11,
+    "wall_ms": 25.86,
+    "graph_stop_depth": 40
+  }
+]

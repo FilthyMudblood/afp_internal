@@ -1,0 +1,5 @@
+scenario,mode,task_completed,planner_steps,preflight_probes,isolated,block_reason,final_depth,wall_ms,graph_stop_depth
+benign,off,True,3,0,False,,3,2.0,3
+benign,on,True,3,3,False,,3,3.79,3
+runaway,off,True,40,0,False,,40,33.46,40
+runaway,on,False,11,12,True,"recursion depth exceeded physical limit, intent loop detected",11,25.86,40
