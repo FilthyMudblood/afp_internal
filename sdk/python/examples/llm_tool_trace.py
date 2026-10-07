@@ -15,6 +15,7 @@ import argparse
 import csv
 import json
 import os
+import socket
 import sys
 import time
 import urllib.error
@@ -26,6 +27,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, Iterator
 
+from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, StateGraph
 
 from afp_sdk import AFPSidecarClient
@@ -144,6 +146,40 @@ JOBS: dict[str, JobSpec] = {
         recursion_limit=30,
         live_ok=True,
     ),
+    "s2_lookups": JobSpec(
+        name="s2_lookups",
+        prompt="Lookup capitals of France, Japan, Kenya, and Peru, then stop.",
+        script=[
+            {"name": "lookup", "args": {"key": "capital:france"}},
+            {"name": "lookup", "args": {"key": "capital:japan"}},
+            {"name": "lookup", "args": {"key": "capital:kenya"}},
+            {"name": "lookup", "args": {"key": "capital:peru"}},
+        ],
+        expected={
+            "capital:france": "Paris",
+            "capital:japan": "Tokyo",
+            "capital:kenya": "Nairobi",
+            "capital:peru": "Lima",
+        },
+        graph_stop_depth=12,
+        recursion_limit=24,
+    ),
+    "s2_fetches": JobSpec(
+        name="s2_fetches",
+        prompt="Fetch /item/1 through /item/6, then stop.",
+        script=[{"name": "fetch", "args": {"path": f"/item/{i}"}} for i in range(1, 7)],
+        expected={f"/item/{i}": f"payload-{i}" for i in range(1, 7)},
+        graph_stop_depth=16,
+        recursion_limit=30,
+    ),
+    "s2_repeat": JobSpec(
+        name="s2_repeat",
+        prompt="Lookup capital:france eight times, then stop.",
+        script=[{"name": "lookup", "args": {"key": "capital:france"}}] * 8,
+        expected={"capital:france": "Paris"},
+        graph_stop_depth=20,
+        recursion_limit=30,
+    ),
     "s3_runaway": JobSpec(
         name="s3_runaway",
         prompt="Keep calling tick until stopped.",
@@ -232,11 +268,12 @@ def _openai_chat(
     messages: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], int]:
     base = os.getenv("OPENAI_BASE_URL", "http://127.0.0.1:11434/v1").rstrip("/")
-    model = os.getenv("OPENAI_MODEL", "llama3.1")
+    model = os.getenv("OPENAI_MODEL", "qwen2.5:0.5b")
     key = os.getenv("OPENAI_API_KEY", "ollama")
     payload = {
         "model": model,
         "temperature": 0,
+        "max_tokens": 128,
         "messages": messages,
         "tools": TOOL_SCHEMAS,
     }
@@ -250,8 +287,10 @@ def _openai_chat(
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as resp:
+        with urllib.request.urlopen(request, timeout=180) as resp:
             data = json.loads(resp.read().decode())
+    except (TimeoutError, socket.timeout) as exc:
+        raise RuntimeError(f"live LLM timed out at {base}: {exc}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"live LLM unreachable at {base}: {exc}") from exc
     usage = data.get("usage") or {}
@@ -382,7 +421,20 @@ def build_app(
         depth = int(state.get("recursion_depth", 0)) + 1
         tokens = 0
         if backend == "live" and job.live_ok:
-            action, tokens = _live_action(job, state)
+            try:
+                action, tokens = _live_action(job, state)
+            except RuntimeError as exc:
+                return {
+                    **state,
+                    "recursion_depth": depth,
+                    "planner_steps": int(state.get("planner_steps", 0)) + 1,
+                    "pending_tool": None,
+                    "done": True,
+                    "afp_block_reason": str(exc),
+                    "context_memory_bytes": max(
+                        64, sum(len(str(m)) for m in (state.get("messages") or [])) * 64
+                    ),
+                }
         else:
             action = _next_scripted_action(job, state)
         token_box["prompt_tokens"] += tokens
@@ -554,16 +606,38 @@ def run_once(
             wall_ms=round(wall_ms, 2),
             prompt_tokens=token_box["prompt_tokens"],
         )
+    except GraphRecursionError as exc:
+        wall_ms = (time.perf_counter() - started) * 1000.0
+        return ToolTraceResult(
+            job=job.name,
+            mode="on" if governed else "off",
+            backend=backend,
+            seed=seed,
+            task_completed=False,
+            false_isolated=False,
+            planner_steps=int(state.get("planner_steps", 0)),
+            tool_calls=int(state.get("tool_calls", 0)),
+            preflight_probes=stats["preflight_probes"],
+            allow=stats["allow"],
+            delay=stats["delay"],
+            isolate_count=stats["isolate_count"],
+            isolated=False,
+            block_reason=public_reason(str(exc).splitlines()[0]),
+            final_depth=int(state.get("recursion_depth", 0)),
+            wall_ms=round(wall_ms, 2),
+            prompt_tokens=token_box["prompt_tokens"],
+        )
     wall_ms = (time.perf_counter() - started) * 1000.0
     blocked = bool(final.get("afp_blocked"))
     completed = _task_completed(job, final, blocked)
+    would_complete = _task_completed(job, final, isolated=False)
     return ToolTraceResult(
         job=job.name,
         mode="on" if governed else "off",
         backend=backend,
         seed=seed,
         task_completed=completed,
-        false_isolated=blocked and job.live_ok,
+        false_isolated=blocked and would_complete,
         planner_steps=int(final.get("planner_steps", 0)),
         tool_calls=int(final.get("tool_calls", 0)),
         preflight_probes=stats["preflight_probes"],
@@ -578,10 +652,12 @@ def run_once(
     )
 
 
-def write_outputs(rows: list[ToolTraceResult], out_dir: Path) -> None:
+def write_outputs(
+    rows: list[ToolTraceResult], out_dir: Path, stem: str = "llm_tool_trace"
+) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-    csv_path = out_dir / "llm_tool_trace.csv"
-    json_path = out_dir / "llm_tool_trace.json"
+    csv_path = out_dir / f"{stem}.csv"
+    json_path = out_dir / f"{stem}.json"
     fieldnames = list(asdict(rows[0]).keys())
     with csv_path.open("w", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
@@ -617,7 +693,7 @@ def selected_jobs(backend: str, raw: str) -> list[JobSpec]:
     elif backend == "live":
         names = ["s1_short", "s2_long"]
     else:
-        names = list(JOBS)
+        names = ["s1_short", "s2_long", "s3_runaway", "s4_storm"]
     missing = [name for name in names if name not in JOBS]
     if missing:
         raise SystemExit(f"unknown jobs: {missing}")
@@ -660,7 +736,8 @@ def main() -> int:
                         AFPSidecarClient.reset_singleton()
                         if not args.socket:
                             stop_sidecar(proc, socket_path)
-    write_outputs(rows, args.out)
+    stem = "llm_tool_trace_live" if args.backend == "live" else "llm_tool_trace"
+    write_outputs(rows, args.out, stem)
     return 0
 
 

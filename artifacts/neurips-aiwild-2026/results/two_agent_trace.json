@@ -1,0 +1,46 @@
+[
+  {
+    "experiment": "two_agent",
+    "layout": "split_sidecars",
+    "agent": "did:afp:agent:a",
+    "job": "s3_runaway",
+    "isolated": true,
+    "task_completed": false,
+    "tools": 10,
+    "probes": 22,
+    "block_reason": "recursion depth exceeded physical limit, intent loop detected"
+  },
+  {
+    "experiment": "two_agent",
+    "layout": "split_sidecars",
+    "agent": "did:afp:agent:b",
+    "job": "s1_short",
+    "isolated": false,
+    "task_completed": true,
+    "tools": 1,
+    "probes": 3,
+    "block_reason": ""
+  },
+  {
+    "experiment": "two_agent",
+    "layout": "shared_sidecar",
+    "agent": "did:afp:agent:a",
+    "job": "s3_runaway",
+    "isolated": true,
+    "task_completed": false,
+    "tools": 10,
+    "probes": 22,
+    "block_reason": "recursion depth exceeded physical limit, intent loop detected"
+  },
+  {
+    "experiment": "two_agent",
+    "layout": "shared_sidecar",
+    "agent": "did:afp:agent:b",
+    "job": "s1_short",
+    "isolated": false,
+    "task_completed": true,
+    "tools": 1,
+    "probes": 3,
+    "block_reason": ""
+  }
+]

@@ -1,0 +1,5 @@
+experiment,layout,agent,job,isolated,task_completed,tools,probes,block_reason
+two_agent,split_sidecars,did:afp:agent:a,s3_runaway,True,False,10,22,"recursion depth exceeded physical limit, intent loop detected"
+two_agent,split_sidecars,did:afp:agent:b,s1_short,False,True,1,3,
+two_agent,shared_sidecar,did:afp:agent:a,s3_runaway,True,False,10,22,"recursion depth exceeded physical limit, intent loop detected"
+two_agent,shared_sidecar,did:afp:agent:b,s1_short,False,True,1,3,

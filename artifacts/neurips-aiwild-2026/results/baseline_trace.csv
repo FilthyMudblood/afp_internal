@@ -1,0 +1,26 @@
+experiment,gate,job,task_completed,isolated,false_isolated,tools,probes,wall_ms,block_reason,note
+jobs,off,s1_short,True,False,False,1,0,1.55,,no preflight
+jobs,stateless,s1_short,True,False,False,1,3,1.99,,per-step check; leftover wiped at request start
+jobs,afp,s1_short,True,False,False,1,3,2.01,,per-step check; leftover kept
+jobs,off,s2_long,True,False,False,8,0,8.3,,no preflight
+jobs,stateless,s2_long,True,False,False,8,17,9.38,,per-step check; leftover wiped at request start
+jobs,afp,s2_long,True,False,False,8,17,8.71,,per-step check; leftover kept
+jobs,off,s2_lookups,True,False,False,4,0,1.46,,no preflight
+jobs,stateless,s2_lookups,True,False,False,4,9,3.84,,per-step check; leftover wiped at request start
+jobs,afp,s2_lookups,True,False,False,4,9,4.22,,per-step check; leftover kept
+jobs,off,s2_fetches,True,False,False,6,0,5.33,,no preflight
+jobs,stateless,s2_fetches,True,False,False,6,13,10.33,,per-step check; leftover wiped at request start
+jobs,afp,s2_fetches,True,False,False,6,13,8.35,,per-step check; leftover kept
+jobs,off,s2_repeat,True,False,False,8,0,2.09,,no preflight
+jobs,stateless,s2_repeat,True,False,False,8,17,6.33,,per-step check; leftover wiped at request start
+jobs,afp,s2_repeat,True,False,False,8,17,6.69,,per-step check; leftover kept
+jobs,off,s3_runaway,True,False,False,39,0,8.26,,no preflight
+jobs,stateless,s3_runaway,False,True,False,10,22,7.85,"recursion depth exceeded physical limit, intent loop detected",per-step check; leftover wiped at request start
+jobs,afp,s3_runaway,False,True,False,10,22,8.09,"recursion depth exceeded physical limit, intent loop detected",per-step check; leftover kept
+jobs,off,s4_storm,True,False,False,49,0,30.8,,no preflight
+jobs,stateless,s4_storm,False,True,False,0,2,1.49,preemptive circuit breaker open (entropy=0.96),per-step check; leftover wiped at request start
+jobs,afp,s4_storm,False,True,False,0,2,1.86,preemptive circuit breaker open (entropy=0.96),per-step check; leftover kept
+persist,stateless,stale_probe,False,False,False,0,1,0.0,,preflight after wipe
+persist,stateless,fresh_s1,True,False,False,1,3,0.0,,new S1 reports depth 0
+persist,afp,stale_probe,False,True,False,0,1,0.0,"recursion depth exceeded physical limit, intent loop detected",preflight without rewriting leftover depth
+persist,afp,fresh_s1,True,False,False,1,3,0.0,,new S1 reports depth 0

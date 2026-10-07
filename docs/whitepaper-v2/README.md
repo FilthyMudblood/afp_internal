@@ -1,5 +1,7 @@
 # Aegis Fabric Protocol Whitepaper v2.0 — Protocol Edition
 
+企业 Path A 的实验与证据边界（不含 Exchange）见 **[AFP-Core 记录白皮书](../whitepaper-core/AFP-Core-记录白皮书.md)**。下面这份 v2 仍混有开放网格章节，不作 Core 存档。
+
 ## Read the whitepaper
 
 **[whitepaper-v2-protocol-edition.md](./whitepaper-v2-protocol-edition.md)** — GitHub Protocol Edition (Draft v0.3)
