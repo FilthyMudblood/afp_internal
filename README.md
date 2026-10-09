@@ -102,8 +102,6 @@ Hallucination →  wrong next step                  →  may ignite the loop; ra
 
 **CPL gates physics, not epistemics:** PreFlight reads depth, entropy, and burst—not whether the LLM "believed" the last message. Fact-checking and hallucination mitigation belong in **L5 / application** layers; AFP is the **L2 brake** that fires regardless of cognitive root cause.
 
-A short paper on this execution-boundary design was submitted to NeurIPS 2026 Agents in the Wild and was not accepted. The reviews asked for a real planner/tool trace rather than a synthetic mesh; that work is in progress here.
-
 ---
 
 ## The Problem
