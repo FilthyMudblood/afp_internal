@@ -25,7 +25,7 @@ PYTHONPATH=sdk/python python sdk/python/examples/llm_tool_trace.py \
   --backend live --out artifacts/neurips-aiwild-2026/results
 ```
 
-Cross-request persistence (one sidecar; S3 then stale probe / fresh S1):
+Retained telemetry (one sidecar; S3 then stale probe / fresh S1):
 
 ```bash
 PYTHONPATH=sdk/python python sdk/python/examples/persist_trace.py \

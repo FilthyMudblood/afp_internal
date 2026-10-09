@@ -1,0 +1,35 @@
+{
+  "upload_type": "publication",
+  "publication_type": "technicalnote",
+  "title": "AFP-Enterprise: Evaluating Host-Level Runtime Containment for Planner–Tool Execution",
+  "description": "Technical report for AFP-Enterprise: a host runtime kernel beside a local planner, reached by a pre-flight probe. Specifies an emergency stop, depth cap, four-axis pressure isolate, and isolate–recover machine. Records laptop planner–tool traces: bounded-job completion, loop/burst containment, and a three-way baseline against a per-step wipe. Traces fire the depth cap and hard isolate; leftover telemetry is the measured increment, not identity-locked persistence. No repository hyperlinks.",
+  "creators": [
+    {
+      "name": "He, Muchen",
+      "affiliation": "Independent researcher"
+    }
+  ],
+  "keywords": [
+    "AFP-Enterprise",
+    "multi-agent systems",
+    "planner-tool runtime",
+    "admission control",
+    "pre-flight check",
+    "retained telemetry",
+    "stale-state retention",
+    "circuit breaker"
+  ],
+  "license": "cc-by-nc-sa-4.0",
+  "access_right": "open",
+  "language": "eng",
+  "version": "1.0.0",
+  "notes": "Document license CC BY-NC-SA 4.0. Author is an independent researcher and lists no institutional affiliation. Related v1 mesh archive: 10.5281/zenodo.20674352. Reserve a new DOI on first upload; do not reuse 10.5281/zenodo.21330527 (that record is the mixed-era v2).",
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.20674352",
+      "relation": "cites",
+      "resource_type": "publication-other",
+      "scheme": "doi"
+    }
+  ]
+}

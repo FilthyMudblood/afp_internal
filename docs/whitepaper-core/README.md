@@ -1,7 +1,9 @@
-# AFP-Core 记录白皮书
+# AFP-Enterprise 白皮书
 
-只覆盖企业级 **AFP-Core（Path A）**。不含 AFP-Exchange / 开放网格。
+场景：本地规划器 + MCP / 本地工具。对外名称 **AFP-Enterprise**：主机内核，预检是调用方式。不要写 Path A / Core。
 
-- **[AFP-Core-记录白皮书.md](./AFP-Core-记录白皮书.md)** — 问题、机制、实现、本机实验与证据边界
+- **[AFP-Core-Path-A-Whitepaper.md](./AFP-Core-Path-A-Whitepaper.md)** — English archival report for Zenodo（文内已用 AFP-Enterprise）
+- **[AFP-Core-记录白皮书.md](./AFP-Core-记录白皮书.md)** — 中文实验与证据边界
+- **[zenodo/UPLOAD.md](./zenodo/UPLOAD.md)** — Zenodo 上传清单
 
-混有开放拓扑与治理头的旧稿仍在 [`../whitepaper-v2/`](../whitepaper-v2/)，不作为 Core 记录。
+混写 v2 在 `AFP-Archived/mixed-whitepaper-v2/`，不作本报告存档。

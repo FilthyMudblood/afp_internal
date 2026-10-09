@@ -25,14 +25,13 @@ coverage.out
 # Optional generated evidence snapshots
 artifacts/screenshots/
 
-# Zenodo publication exports (local only — not published to GitHub)
+# Mixed whitepaper / Zenodo export moved to ../AFP-Archived
 artifacts/zenodo/
-
-# Chinese whitepaper (local only — not published to GitHub)
-docs/whitepaper-v2/白皮书-v2-中文版.md
+docs/whitepaper-v2/
 
 # Python SDK artifacts
 **/__pycache__/
 *.py[cod]
 .pytest_cache/
 *.egg-info/
+*.blg

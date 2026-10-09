@@ -1,5 +1,7 @@
 # AFP Protocol Architecture
 
+> **Live tree:** AFP-Path-A (enterprise Path A). Path B sections below are leftover spec. Mixed full edition: [`../AFP-Archived/architecture-mixed.md`](../AFP-Archived/architecture-mixed.md). Exchange writing: [`../AFP-Path-B`](../AFP-Path-B).
+
 > **Aegis Fabric Protocol (AFP)** — *A Physical Constraint Protocol for Autonomous Optimizers*
 >
 > Protocol Specification · Draft v1.0 · Reference Implementation: PR-6c
@@ -9,7 +11,8 @@ This document is the **technical contract** between:
 | Document | Role |
 |----------|------|
 | **This file (`ARCHITECTURE.md`)** | Protocol stack, core objects, enforcement paths — **language-agnostic** |
-| **Whitepaper v2.0 (Protocol Edition)** | Theory, proofs, open-network equilibrium — [`docs/whitepaper-v2/whitepaper-v2-protocol-edition.md`](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md) |
+| **Whitepaper (Path A record)** | [`docs/whitepaper-core/AFP-Core-记录白皮书.md`](docs/whitepaper-core/AFP-Core-记录白皮书.md) |
+| **Whitepaper v2.0 mixed (archived)** | [`../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md`](../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md) |
 | **Enterprise Deployment Guide** | K8s, GitOps, compliance — separate handbook (`README.md`, `deploy/kubernetes/`) |
 | **`CODEBASE.md`** | Repository navigation and file paths |
 
@@ -418,7 +421,8 @@ Asymmetric FSM recovery (`k_isolation` / `k_probation` / anti-thrashing) is impl
 | [CODEBASE.md](CODEBASE.md) | Repository layout and commands |
 | [ROADMAP.md](ROADMAP.md) | Phase 3 hardening backlog |
 | [Whitepaper v1 (Zenodo)](https://zenodo.org/records/20674352) | Published empirical baseline (archived) |
-| [Whitepaper v2 (Protocol Edition)](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md) | Unified theory document · Draft v0.3 |
+| [Path A record](docs/whitepaper-core/AFP-Core-记录白皮书.md) | Enterprise Path A only |
+| [Mixed v2 (archived)](../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md) | Unified theory document · Draft v0.3 |
 
 ---
 

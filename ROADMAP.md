@@ -59,7 +59,7 @@
 | **CrewAI / AutoGen adapters** | Same SDK pattern as LangGraph |
 | **Argent Signaling Protocol (ASP) interop doc** | Position AFP relative to ASP and other application-layer protocols |
 | **SLO templates** | `afp_preflight_actions_total` → Grafana dashboards + alert rules |
-| **Whitepaper v2.0 Zenodo DOI** | Protocol Edition in repo: [`docs/whitepaper-v2/whitepaper-v2-protocol-edition.md`](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md) · v1: [Zenodo](https://zenodo.org/records/20674352) |
+| **Whitepaper v2.0 Zenodo DOI** | Mixed Protocol Edition archived: [`../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md`](../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md) · v1: [Zenodo](https://zenodo.org/records/20674352) |
 
 ---
 

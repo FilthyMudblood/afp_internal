@@ -1,6 +1,6 @@
-# AFP-Core（企业）
+# AFP-Enterprise
 
-GitHub 仓库名仍是 Aegis Fabric Protocol。本目录是 **企业 / Path A** 协议。
+本地规划器旁边的主机内核。预检是调用方式；内核在不可逆工具 I/O **之前**回答放行、延迟或隔离。
 
 [![Docker Publish](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml)
 [![GHCR Sidecar](https://img.shields.io/badge/GHCR-sidecar-2496ED?logo=docker&logoColor=white)](https://ghcr.io/filthymudblood/aegis-fabric-sidecar)
@@ -8,26 +8,20 @@ GitHub 仓库名仍是 Aegis Fabric Protocol。本目录是 **企业 / Path A** 
 [![GHCR Demo Agent](https://img.shields.io/badge/GHCR-demo--agent-2496ED?logo=docker&logoColor=white)](https://ghcr.io/filthymudblood/afp-demo-agent)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-### **企业 Agent-to-Agent 的物理刹车片**
-
-*Path A：在行政域内管住自己的 planner*
-
 > **"TCP 治理数据包，AFP 治理优化器"**
 > *(TCP governs packets. AFP governs optimizers.)*
 
-**Aegis Fabric Protocol（AFP）** 是面向**企业 agent-to-agent** 的**后果持久层（CPL）**：插在「Agent 能通信」和「这支舰队能存活」之间的运行时刹车。参考实现为 K8s Sidecar。
+规划框架（LangGraph、CrewAI）决定下一步做什么。MCP、HTTP、gRPC 负责把字节送出去。两者都不回答：**这一跳能不能跑？** AFP-Enterprise 作为规划器旁边的 sidecar，用深度、压力和突发提示回答，不解析 prompt，也不解析 tool schema。
 
-开放网格下的邻居治理（陌生人、治理头、身份绑定拒绝）是**分开写的姊妹协议 AFP-Exchange**（`../AFP-Exchange`）。本仓库不实现、不评价那一套。双栖节点仍应共用 allow / delay / isolate 字母表，以免 split-brain——那是共享内核，不是一个 sidecar 加开关。
+这套理念已经在真实 planner–tool 链路上测过。有界任务能做完；测过的死循环和突发会停。相对普通逐步清零，多出来的是残留主机遥测。见 [实测结果](#实测结果)。
 
-English · [`README.md`](README.md) · 白皮书 · **[v2 Protocol Edition（英文）](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)** · [v1 Zenodo 存档](https://zenodo.org/records/20674352)
-
-关于这一执行边界设计的一篇短文曾投往 NeurIPS 2026 Agents in the Wild，未被录用。审稿要求用真实 planner/tool 轨迹代替合成网格；这部分工作正在本仓库推进。
+English · [`README.md`](README.md) · 白皮书 · [AFP-Enterprise PDF](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf) · [记录稿](docs/whitepaper-core/AFP-Core-记录白皮书.md) · [集成手册](docs/AFP-Enterprise-Active-Network-集成手册.md) · [v1 Zenodo](https://zenodo.org/records/20674352)
 
 ### 市场空白
 
 Multi-agent 栈解决了**规划**（LangGraph、CrewAI）和**传输**（gRPC、Kafka、MCP、ASP）。都没解决**协调运行时**：
 
-> *这一步能不能执行？失控之后，后果能不能记住？*
+> *这一步能不能执行？如果拒绝了，主机还记住什么？*
 
 | 层次 | 状态 |
 |------|------|
@@ -35,14 +29,9 @@ Multi-agent 栈解决了**规划**（LangGraph、CrewAI）和**传输**（gRPC�
 | 语义协作 | 演进中 — ASP、A2A、MCP |
 | **协调运行时法则** | **空白 — AFP 填这一格** |
 
-| 场景 | AFP 回答什么 |
-|------|----------------|
-| **企业 multi-agent（本仓库）** | 在 Pod 内、出网前掐灭 planner 失控 —— 避免 OOM、Token 燃烧、重试雪崩 |
-| **开放网格（姊妹协议 AFP-Exchange）** | 陌生人准入与身份绑定拒绝：另文另仓库，本仓库不实现、不评价 |
+本仓库是 **AFP-Enterprise**：管你自己的规划器和工具。开放网格邻居治理不在这里主张。
 
-> *Agent 学会了说话，网络学会了路由。**还没有人在优化器提交之前踩刹车，并记住它失控过。***
-
-本仓库是 **closed mesh / Path A**（mTLS，以 PreFlight 为主）。**open exchange**（GovernanceHeader、CVP、陌生人税）见姊妹协议 [AFP-Exchange](../AFP-Exchange)，不要当成同一个 sidecar 的开关。白皮书 §4 仍保留规格讨论，不等于本仓库已交付。
+> *Agent 学会了说话，网络学会了路由。AFP 在优化器提交之前踩刹车。*
 
 ### 为什么 Agent 堆叠需要「有记忆」
 
@@ -52,7 +41,7 @@ Multi-agent 栈解决了**规划**（LangGraph、CrewAI）和**传输**（gRPC�
 堆叠风险  ≈  深度 × 分支 × 上下文 × peer 传染
 ```
 
-按请求放行的网关会**遗忘**。优化器会把工作拆成无数语法合法的小步来绕过。CPL 把后果绑在 **agent/peer 身份**上，堆叠失控无法靠「每一跳都很礼貌」来洗白。
+按请求放行的网关会**遗忘**。优化器会把工作拆成无数语法合法的小步来绕过。AFP-Enterprise 把上次上报的主机遥测留到下一次上报覆盖，残留深度仍可能拦住下一跳。
 
 | 对象 | CPL 管什么 | CPL 不判断什么 |
 |------|------------|----------------|
@@ -182,7 +171,7 @@ PERMISSIVE | THROTTLED + delay | ISOLATED
 
 首次隔离时可向高 CVP 的 core relay 发出带签的 `TopologyWarning`。**入站：** 无签名或 ed25519 验签失败的流言当噪声丢弃；伪造签名会崖式扣减声称 reporter 的 CVP。跨节点线传输仍在加固（见 [`ROADMAP.md`](ROADMAP.md)）。
 
-理论：[白皮书 §3 FSM](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement) · [§4 gossip](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#open-network-topology)
+理论：[AFP-Enterprise 白皮书](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ### 「防止坏 intent」在这里指什么
 
@@ -198,7 +187,7 @@ AFP **不判断** intent 在语义或道德上是否「坏」。它拦截的是*
 
 **主要对象是堆叠失控**，不是语义上的「坏 intent」。本仓库的企业协议管的是自家 planner 链。物理恶意陌生人（过载导出、传染、换马甲）属于 **AFP-Exchange**，不是本仓库的交付主张。
 
-理论全文：[白皮书 v2 §2 CPL](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#consequence-persistence-layer) · [§3 意图前执法](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement)
+理论全文：[AFP-Enterprise 白皮书](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ---
 
@@ -232,7 +221,7 @@ ASP 等应用层信令解决的是**路口交通灯**问题：
 
 **立场：** 信令不是敌人；把它当作*唯一*防线才是架构失误。AFP 位于应用协议**之下** —— 类似 Envoy 之于 HTTP、cgroup 之于进程：带外、微秒级、fail-closed。
 
-详见白皮书 v2 · [完整协议版](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)
+详见 [AFP-Enterprise 白皮书](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ---
 
@@ -404,13 +393,48 @@ docker pull ghcr.io/filthymudblood/afp-demo-agent:latest
 
 ---
 
-## 实证
+## 实测结果
 
-Monte Carlo：**1,000 × 500 节点 × 5% 恶意** — Baseline 存活 0.4% vs AFP **100%**
+主证据是 **脚本 LangGraph + 真工具**（本地 lookup + 本机 HTTP GET），2026-10-07，一台电脑。三路对照：无闸、逐步清零（每次请求把深度写成 0）、当前 sidecar（残留深度保留）。
+
+理念在这条链路上成立：
+
+- 五类有界任务在三种闸下都能做完，误杀 = **0**
+- 死循环（S3）无闸堆到图帽 40；两种有闸都在上报深度 **11** 隔离
+- 48 突发（S4）无闸是 1 次 expand + 48 次 GET = **49** 次工具；两种有闸都在 GET 前拒绝（`48/50 = 0.96`）
+- S1–S4 **分不出**逐步清零和当前 sidecar。只有隔离后不改深度再探会分开：清零放行，sidecar 拒绝。新任务报深度 0，两边都放行
+
+| 场景 | 无闸 | 逐步清零 | 当前 sidecar |
+|------|------|----------|--------------|
+| 五类有界任务 | 做成 | 做成 | 做成 |
+| 误杀 | 0 | 0 | 0 |
+| 死循环 / 48 GET 突发 | 不拦 | 拦 | 拦 |
+| 残留探测，不改写 | — | 放行 | **拒绝** |
+| 新任务报深度 0 | — | 放行 | 放行 |
+
+无闸 vs 当前 sidecar：
+
+| 任务 | 闸 | 做成 | 工具数 | 隔离 | 深度 | 原因 |
+|------|----|------|--------|------|------|------|
+| S1 短 | 关 / 开 | 是 / 是 | 1 / 1 | 否 | 2 | — |
+| S2 长 | 关 / 开 | 是 / 是 | 8 / 8 | 否 | 9 | — |
+| S3 失控 | 关 / 开 | 到帽 / 否 | 39 / 10 | 否 / **是** | 40 / 11 | 递归帽 |
+| S4 风暴 | 关 / 开 | 是 / 否 | 49 / 0 | 否 / **是** | 50 / 1 | 突发熵 |
+
+五类有界任务平均墙钟（仅示意）：关闸 **3.8 ms**，清零 **6.4 ms**，sidecar **6.0 ms**。
+
+两台规划器共用一台 sidecar 会互相覆盖。隔离是主机级，不是按身份锁死。分开 sidecar 则互不影响。
+
+本机 Qwen2.5 0.5B 只作补充：S1 做成，S2 做不完。那是模型能力，不是 LLM-agent 验证。主证据仍是脚本规划器。
+
+500 节点蒙特卡洛放在附录，是熔断**不变量**（100% 是构造，不是现场结果）。不要当标题数字。
 
 ```bash
-go run ./cmd/demo/simulator
+PYTHONPATH=sdk/python python sdk/python/examples/baseline_trace.py
+PYTHONPATH=sdk/python python sdk/python/examples/llm_tool_trace.py
 ```
+
+全表见 [AFP-Enterprise 白皮书](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)。
 
 ---
 
@@ -421,7 +445,7 @@ go run ./cmd/demo/simulator
 | **Phase 1** | 数据面 · SDK · LangGraph · K8s 伴生 · CRD Operator · demo-agent |
 | **Phase 2** | 策略推流 · Operator 桥接 · TokenReview · revision 续传 · **mTLS** · **状态回写** · **删除传播** · GHCR CI |
 
-**代码冻结于 PR-6c。** 生产加固：[`ROADMAP.md`](ROADMAP.md) · 理论：[白皮书 v2.0 协议版](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md) · v1 存档：[Zenodo](https://zenodo.org/records/20674352)
+生产加固：[`ROADMAP.md`](ROADMAP.md) · 理论：[AFP-Enterprise 白皮书](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf) · v1 存档：[Zenodo](https://zenodo.org/records/20674352)
 
 ---
 

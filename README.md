@@ -1,8 +1,8 @@
 
 
-# AFP-Core (enterprise)
+# AFP-Enterprise
 
-GitHub: **Aegis Fabric Protocol**. This tree is the **enterprise / Path A** protocol.
+Host runtime kernel for a local planner and its tools. Pre-flight is the call; the kernel answers allow, delay, or isolate **before** irreversible tool I/O.
 
 [Docker Publish](https://github.com/FilthyMudblood/aegis-fabric/actions/workflows/docker-publish.yml)
 [GHCR Sidecar](https://ghcr.io/filthymudblood/aegis-fabric-sidecar)
@@ -10,26 +10,20 @@ GitHub: **Aegis Fabric Protocol**. This tree is the **enterprise / Path A** prot
 [GHCR Demo Agent](https://ghcr.io/filthymudblood/afp-demo-agent)
 [License](LICENSE)
 
-### **The Physical Brakes for Enterprise Multi-Agent Systems**
-
-*Path A: govern your own planners inside an administrative boundary*
-
 > **"TCP governs packets. AFP governs optimizers."**
 > *(TCP 治理数据包，AFP 治理优化器)*
 
-**Aegis Fabric Protocol (AFP)** is a **Consequence Persistence Layer (CPL)** for **enterprise agent-to-agent** coordination: an out-of-band runtime brake between *agents can talk* and *this fleet survives*. Reference deployments use a Kubernetes-native sidecar.
+Planning stacks (LangGraph, CrewAI) decide *what to do next*. MCP, HTTP, and gRPC move bytes. Neither answers: **may this hop run?** AFP-Enterprise sits beside the planner as an out-of-band sidecar and answers from depth, pressure, and a burst hint — not by parsing prompts or tool schemas.
 
-Open-mesh neighbor governance (strangers, governance header, identity-bound refuse) is a **sister protocol, written separately** as **AFP-Exchange** (`../AFP-Exchange`). This repository does not implement or evaluate that stack. A node that runs both should still share the allow / delay / isolate letters so the two paths cannot split-brain — that is a shared kernel, not one binary with a mode switch.
+That design is now measured on a real planner–tool harness. Bounded jobs complete. Tested loops and bursts stop. Relative to an ordinary per-step wipe, the extra behavior is leftover host telemetry. See [Measured results](#measured-results).
 
-中文文档 · [`README.zh-CN.md`](README.zh-CN.md) · Whitepapers · **[v2 Protocol Edition](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)** · [v1 on Zenodo](https://zenodo.org/records/20674352)
-
-A short paper on this execution-boundary design was submitted to NeurIPS 2026 Agents in the Wild and was not accepted. The reviews asked for a real planner/tool trace rather than a synthetic mesh; that work is in progress here.
+中文 · [`README.zh-CN.md`](README.zh-CN.md) · 白皮书 · [AFP-Enterprise PDF](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf) · [记录稿](docs/whitepaper-core/AFP-Core-记录白皮书.md) · [集成手册](docs/AFP-Enterprise-Active-Network-集成手册.md) · [v1 Zenodo](https://zenodo.org/records/20674352)
 
 ### The gap
 
 Multi-agent stacks solve **planning** (LangGraph, CrewAI) and **messaging** (gRPC, Kafka, MCP, ASP). None solve **coordination runtime**:
 
-> *May this step execute—and do consequences persist when it does not?*
+> *May this step execute? If it is refused, what does the host still remember?*
 
 
 | Layer                        | Status                           |
@@ -40,15 +34,9 @@ Multi-agent stacks solve **planning** (LangGraph, CrewAI) and **messaging** (gRP
 
 
 
-| Mode                       | What AFP answers                                                                                    |
-| -------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Enterprise multi-agent** | Stop runaway planners *inside* the pod—before OOM, token burn, and retry cascades |
-| **Open mesh (sister protocol)** | Specified in **AFP-Exchange**, not this repo: admit physically viable strangers; this paper/codebase does not claim that eval |
+This repository is **AFP-Enterprise**: a sidecar beside *your* planner, before *your* tools. Open-mesh neighbor governance is out of scope here.
 
-
-> *Agents learned to talk. Networks learned to route. **Nobody brakes the optimizer before it commits—and remembers when it failed.***
-
-This repository is **closed mesh / Path A** (mTLS, PreFlight-first). **Open exchange** (GovernanceHeader, CVP, stranger tax) is the sister protocol [AFP-Exchange](../AFP-Exchange), not a mode switch on this sidecar. Whitepaper §4 still records the spec; it is not a claim that this repo ships it.
+> *Agents learned to talk. Networks learned to route. AFP brakes the optimizer before it commits.*
 
 ### Why agent stacking needs memory
 
@@ -58,7 +46,7 @@ This repository is **closed mesh / Path A** (mTLS, PreFlight-first). **Open exch
 Stack risk  ≈  depth × branching × context × peer contagion
 ```
 
-Per-request gateways **forget**. Optimizers evade by splitting work into syntactically valid micro-steps. CPL binds consequences to **agent/peer identity** so stacked runaway cannot reset by staying polite per hop.
+Per-request gateways **forget**. Optimizers evade by splitting work into syntactically valid micro-steps. AFP-Enterprise keeps last-reported host telemetry until a later report overwrites it, so a leftover depth can still refuse the next hop.
 
 | Target | What CPL addresses | What CPL does not judge |
 |--------|-------------------|-------------------------|
@@ -194,7 +182,7 @@ PERMISSIVE | THROTTLED + delay | ISOLATED
 
 On first isolate, the sidecar may emit a signed `TopologyWarning` to high-CVP core relays. **Inbound:** unsigned or invalid ed25519 warnings are discarded as noise; forged signatures cliff-penalize the claimed reporter. Wire fan-out across peers is still hardening (see [`ROADMAP.md`](ROADMAP.md)).
 
-Theory: [Whitepaper §3 — Pre-Intent / FSM](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement) · [§4 — gossip](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#open-network-topology)
+Theory: [AFP-Enterprise whitepaper](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ### What "prevent bad intent" means here
 
@@ -212,7 +200,7 @@ Friction applies **before commit**, with **persistent consequences**—so runawa
 
 **Primary target is out-of-control stacking**, not semantic "bad intent." In this enterprise protocol, that means your own planner chain runaway. Physically malicious strangers (overload export, contagion, identity rotation) belong to **AFP-Exchange**, not to this codebase's claims.
 
-Theory: [Whitepaper v2 §2 — CPL](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#consequence-persistence-layer) · [§3 — Pre-Intent](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md#pre-intent-enforcement)
+Theory: [AFP-Enterprise whitepaper](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ---
 
@@ -249,7 +237,7 @@ That is necessary infrastructure. It is **not sufficient** for physical safety i
 
 **Design stance:** Signaling is not the enemy. Treating it as the *only* line of defense is the architectural mistake. AFP sits **below** application protocols — same relationship Envoy has to HTTP, or cgroups have to your process: out-of-band, microsecond, fail-closed.
 
-Deep dive: [Whitepaper v2 — Protocol Edition](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md)
+Deep dive: [AFP-Enterprise whitepaper](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf)
 
 ---
 
@@ -529,20 +517,48 @@ Blocked intents become `afp_blocked` state — route to human-in-the-loop instea
 
 ---
 
-## Empirical Proof
+## Measured results
 
-Monte Carlo: **1,000 runs × 500 nodes × 5% malicious × 100 epochs**
+Primary evidence is a **scripted LangGraph planner with real tools** (local lookup + loopback HTTP GET) on one machine, 7 October 2026. Three conditions: no gate, per-step wipe (depth reset to 0 at each request), current sidecar (leftover depth kept).
 
+The design holds on that harness:
 
-| Network  | Survivors              |
-| -------- | ---------------------- |
-| Baseline | **500 → 2.05** (~0.4%) |
-| **AFP**  | **500.00** (100%)      |
+- Five bounded jobs complete under every gate. False isolate = **0**.
+- A scripted loop (S3) walks to graph cap 40 without a gate; both gated variants isolate at reported depth **11**.
+- A 48-GET burst (S4) is one expand + 48 GETs = **49** tool executions without a gate; both gated variants refuse before any GET (`e_burst = 48/50 = 0.96`).
+- S1–S4 **do not distinguish** wipe from the current sidecar. They differ only on a stale post-isolate probe: wipe allows, sidecar refuses. A new job that reports depth 0 is admitted under both.
 
+| Scene | No gate | Per-step wipe | Current sidecar |
+| ----- | ------- | ------------- | --------------- |
+| Five bounded jobs | done | done | done |
+| False isolate | 0 | 0 | 0 |
+| Loop / 48-GET burst | not stopped | stopped | stopped |
+| Stale probe, no rewrite | — | allow | **refuse** |
+| New job reports depth 0 | — | allow | allow |
+
+No-gate vs current sidecar on the four named jobs:
+
+| Job | Gate | Done | Tools | Isolated | Depth | Reason |
+| --- | ---- | ---- | ----- | -------- | ----- | ------ |
+| S1 short | off / on | yes / yes | 1 / 1 | no | 2 | — |
+| S2 long | off / on | yes / yes | 8 / 8 | no | 9 | — |
+| S3 runaway | off / on | to cap / no | 39 / 10 | no / **yes** | 40 / 11 | recursion cap |
+| S4 storm | off / on | yes / no | 49 / 0 | no / **yes** | 50 / 1 | burst entropy |
+
+Mean wall-clock on the five bounded jobs (indicative only): **3.8 ms** off, **6.4 ms** wipe, **6.0 ms** sidecar.
+
+Two planners on **one** sidecar can overwrite each other. Isolation is host-level, not a lock on agent identity. Split sidecars keep the second planner healthy.
+
+A local Qwen2.5 0.5B arm is supplementary: S1 completes; S2 does not finish. That is model quality, not LLM-agent validation. The scripted planner is the primary evidence.
+
+A 500-node Monte Carlo remains in the appendix as a **breaker invariant** (100% survival is construction, not a field result). Do not use it as a title number.
 
 ```bash
-go run ./cmd/demo/simulator && make demo-report
+PYTHONPATH=sdk/python python sdk/python/examples/baseline_trace.py
+PYTHONPATH=sdk/python python sdk/python/examples/llm_tool_trace.py
 ```
+
+Full tables: [AFP-Enterprise whitepaper](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf).
 
 ---
 
@@ -590,7 +606,7 @@ Key series: `afp_preflight_actions_total`, `afp_ingress_actions_total`
 | **Phase 2** | `StreamPolicyUpdates` · Operator→Controller bridge · SA TokenReview · revision replay · **mTLS** · **status writeback** · **delete propagation** · GHCR CI |
 
 
-**Frozen after PR-6c.** Production hardening: [`ROADMAP.md`](ROADMAP.md) · Theory: [Whitepaper v2.0 Protocol Edition](docs/whitepaper-v2/whitepaper-v2-protocol-edition.md) · v1 archive: [Zenodo](https://zenodo.org/records/20674352)
+Production hardening: [`ROADMAP.md`](ROADMAP.md) · Theory: [AFP-Enterprise whitepaper](docs/whitepaper-core/AFP-Enterprise-Whitepaper.pdf) · v1 archive: [Zenodo](https://zenodo.org/records/20674352)
 
 ---
 
