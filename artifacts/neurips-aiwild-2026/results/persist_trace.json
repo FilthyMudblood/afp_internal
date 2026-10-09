@@ -1,0 +1,22 @@
+[
+  {
+    "experiment": "persist",
+    "arm": "stale_probe",
+    "isolated": true,
+    "task_completed": false,
+    "probes": 1,
+    "block_reason": "recursion depth exceeded physical limit, intent loop detected",
+    "leftover_depth": 11,
+    "note": "preflight without rewriting sidecar telemetry"
+  },
+  {
+    "experiment": "persist",
+    "arm": "fresh_s1",
+    "isolated": false,
+    "task_completed": true,
+    "probes": 3,
+    "block_reason": "",
+    "leftover_depth": 0,
+    "note": "new S1 reports its own depth starting at 0"
+  }
+]

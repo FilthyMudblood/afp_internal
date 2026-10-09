@@ -1,0 +1,5 @@
+job,mode,backend,seed,task_completed,false_isolated,planner_steps,tool_calls,preflight_probes,allow,delay,isolate_count,isolated,block_reason,final_depth,wall_ms,prompt_tokens
+s1_short,off,live,0,True,False,2,1,0,0,0,0,False,,2,954.16,604
+s1_short,on,live,0,True,False,2,1,3,3,0,0,False,,2,240.82,604
+s2_long,off,live,0,False,False,0,0,0,0,0,0,False,Recursion limit of 30 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.,0,13048.36,18859
+s2_long,on,live,0,False,False,11,10,22,21,0,1,True,"recursion depth exceeded physical limit, intent loop detected",11,9614.01,10799

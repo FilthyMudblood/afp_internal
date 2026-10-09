@@ -70,3 +70,10 @@ func (s *InMemoryNeighborStore) ApplyPreemptiveDecay(peerID string, decayFactor 
 	}
 	s.peerCVP[peerID] = newCVP
 }
+
+func (s *InMemoryNeighborStore) GetCVP(peerID string) (float64, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	cvp, ok := s.peerCVP[peerID]
+	return cvp, ok
+}

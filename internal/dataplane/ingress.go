@@ -158,7 +158,7 @@ func (sea *SingleExecutionAuthority) HandleIngress(ctx context.Context, peerID s
 		return ErrTopologyIsolated
 
 	case afpcontrol.ActionLowFrequencyProbe:
-		if currentEpoch%10 != 0 {
+		if currentEpoch%afpcontrol.ProbationProbeModulo != 0 {
 			telemetry.IngressActionTotal.WithLabelValues("drop_probation").Inc()
 			return ErrProbationReject
 		}

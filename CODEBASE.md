@@ -26,7 +26,7 @@ aegis-fabric/
 ├── Dockerfile.demo-agent      # LangGraph demo agent
 ├── ROADMAP.md                 # Phase 3+ hardening (no new features on main)
 ├── ARCHITECTURE.md            # AFP protocol specification (L0–L5, CPL, SEA, CVP)
-└── docs/whitepaper-v2/        # Whitepaper v2.0 Protocol Edition (see README.md)
+└── docs/whitepaper-core/      # Path A record only; mixed v2 is in ../AFP-Archived
 ```
 
 ---

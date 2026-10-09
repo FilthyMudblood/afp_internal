@@ -10,6 +10,12 @@ const (
 	EWarn       = 0.75 // 高拥塞预警线
 	CVPCritical = 0.3  // 拓扑信誉破产线
 
+	// Asymmetric hysteresis (whitepaper §3.4 / §4.2): degrade fast, recover slow.
+	KIsolationEpochs     uint64  = 64  // Isolated → Probationary minimum dwell
+	KProbationEpochs     uint64  = 128 // Probationary → Permissive minimum dwell
+	CVPPermissiveFloor   float32 = 0.8 // Full permissive egress CVP floor
+	ProbationProbeModulo uint64  = 10  // Probe admission: epoch ≡ 0 (mod 10)
+
 	// Kernel Parameters
 	Alpha  DecayFactor  = 0.95 // 历史衰减因子
 	Beta   RewardWeight = 0.05 // 吞吐量奖励权重

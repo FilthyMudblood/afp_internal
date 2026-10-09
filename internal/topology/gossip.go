@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-// TopologyWarning represents a signed out-of-band P2P alert regarding an isolated peer.
+// TopologyWarning is a signed out-of-band P2P alert regarding an isolated peer.
 type TopologyWarning struct {
 	IsolatedPeerID string
 	ReporterID     string
@@ -14,7 +14,35 @@ type TopologyWarning struct {
 	Signature      []byte
 }
 
-// NeighborStore provides thread-safe access to the local storage layer to fetch core neighbors.
+// WarningDisposition is the result of handling an inbound TopologyWarning.
+type WarningDisposition int
+
+const (
+	WarningAccepted WarningDisposition = iota
+	WarningRejectedUnsigned
+	WarningRejectedUnknownReporter
+	WarningRejectedBadSignature
+	WarningRejectedDuplicate
+)
+
+func (d WarningDisposition) String() string {
+	switch d {
+	case WarningAccepted:
+		return "accepted"
+	case WarningRejectedUnsigned:
+		return "rejected_unsigned"
+	case WarningRejectedUnknownReporter:
+		return "rejected_unknown_reporter"
+	case WarningRejectedBadSignature:
+		return "rejected_bad_signature"
+	case WarningRejectedDuplicate:
+		return "rejected_duplicate"
+	default:
+		return "unknown"
+	}
+}
+
+// NeighborStore provides thread-safe access to local topology state.
 type NeighborStore interface {
 	GetTrustedNeighbors(minCVPSThreshold float64) []string
 	ApplyPreemptiveDecay(peerID string, decayFactor float64)
@@ -22,49 +50,115 @@ type NeighborStore interface {
 	UpsertEndpoint(peerID string, endpoint string)
 }
 
+const (
+	coreRelayCVPThreshold = 0.8
+	preemptiveDecayFactor = 0.5
+	// Unverified / forged gossip damages the reporter's local CVP (cliff penalty).
+	poisonReporterDecay = 0.25
+)
+
 // GossipBroadcaster handles asynchronous, targeted propagation of isolation events.
+// Inbound unsigned or invalidly signed warnings are discarded as noise at line rate.
 type GossipBroadcaster struct {
 	mu       sync.RWMutex
 	store    NeighborStore
-	localDID string
+	identity *Identity
+	keys     *PublicKeyDirectory
+	seen     sync.Map // dedup: WarningDedupKey → struct{}
 }
 
-func NewGossipBroadcaster(localDID string, store NeighborStore) *GossipBroadcaster {
+func NewGossipBroadcaster(identity *Identity, store NeighborStore, keys *PublicKeyDirectory) *GossipBroadcaster {
+	if keys == nil {
+		keys = NewPublicKeyDirectory()
+	}
+	if identity != nil {
+		keys.Register(identity.DID, identity.PublicKey)
+	}
 	return &GossipBroadcaster{
 		store:    store,
-		localDID: localDID,
+		identity: identity,
+		keys:     keys,
 	}
 }
 
-// BroadcastWarning executes the preemptive P2P gossip protocol.
-// It strictly limits propagation to high-reputation Core Neighbors (CVP > 0.8).
+func (g *GossipBroadcaster) LocalDID() string {
+	if g.identity == nil {
+		return ""
+	}
+	return g.identity.DID
+}
+
+func (g *GossipBroadcaster) PublicKeys() *PublicKeyDirectory {
+	return g.keys
+}
+
+// BroadcastWarning signs a TopologyWarning and fans out to core relays (CVP ≥ 0.8).
+// Wire send remains best-effort / TODO; signing is mandatory before any emit.
 func (g *GossipBroadcaster) BroadcastWarning(ctx context.Context, isolatedPeer string, currentEpoch uint64) {
-	// 异步执行，不阻塞数据面的 Fast Path
 	go func() {
-		trustedPeers := g.store.GetTrustedNeighbors(0.8)
+		trustedPeers := g.store.GetTrustedNeighbors(coreRelayCVPThreshold)
 		if len(trustedPeers) == 0 {
 			return
 		}
 
 		warning := &TopologyWarning{
 			IsolatedPeerID: isolatedPeer,
-			ReporterID:     g.localDID,
 			Epoch:          currentEpoch,
-			Signature:      []byte("local_crypto_signature_placeholder"),
+		}
+		if err := g.identity.SignWarning(warning); err != nil {
+			slog.Error("refusing to broadcast unsigned topology warning", "error", err)
+			return
 		}
 
-		slog.Warn("broadcasting topology warning to core neighbors",
+		slog.Warn("broadcasting signed topology warning to core neighbors",
 			"isolated_peer", isolatedPeer,
-			"trusted_targets", len(trustedPeers))
+			"reporter", warning.ReporterID,
+			"trusted_targets", len(trustedPeers),
+			"signature_bytes", len(warning.Signature))
 
-		// TODO: Execute parallel P2P UDP/TCP transmission to trustedPeers.
+		// TODO: parallel P2P transmission to trustedPeers.
+		_ = ctx
 		_ = warning
+		_ = trustedPeers
 	}()
 }
 
-// HandleIncomingWarning processes an asynchronous gossip warning from a neighbor.
-func (g *GossipBroadcaster) HandleIncomingWarning(warning *TopologyWarning) {
-	// 验证签名的合法性后，触发预防性衰减 (Preemptive Decay)
-	slog.Info("received trusted topology warning, applying preemptive decay", "target", warning.IsolatedPeerID)
-	g.store.ApplyPreemptiveDecay(warning.IsolatedPeerID, 0.5) // 直接削减 50% 信誉
+// HandleIncomingWarning verifies reporter signature before applying preemptive CVP decay.
+// Unverified hearsay is discarded; forged signatures cliff-penalize the claimed reporter when known.
+func (g *GossipBroadcaster) HandleIncomingWarning(warning *TopologyWarning) WarningDisposition {
+	if warning == nil || len(warning.Signature) == 0 {
+		slog.Info("discarding unsigned topology warning as noise")
+		return WarningRejectedUnsigned
+	}
+
+	key := WarningDedupKey(warning)
+	if _, loaded := g.seen.LoadOrStore(key, struct{}{}); loaded {
+		return WarningRejectedDuplicate
+	}
+
+	pub, ok := g.keys.Lookup(warning.ReporterID)
+	if !ok {
+		slog.Info("discarding topology warning from unknown reporter",
+			"reporter", warning.ReporterID)
+		return WarningRejectedUnknownReporter
+	}
+
+	if !VerifyWarningSignature(warning, pub) {
+		slog.Warn("discarding forged topology warning; penalizing reporter CVP",
+			"reporter", warning.ReporterID,
+			"target", warning.IsolatedPeerID)
+		g.store.ApplyPreemptiveDecay(warning.ReporterID, poisonReporterDecay)
+		return WarningRejectedBadSignature
+	}
+
+	slog.Info("accepted signed topology warning, applying preemptive decay",
+		"target", warning.IsolatedPeerID,
+		"reporter", warning.ReporterID)
+	g.store.ApplyPreemptiveDecay(warning.IsolatedPeerID, preemptiveDecayFactor)
+	return WarningAccepted
+}
+
+// SignWarningForTest exposes signing for unit tests / harnesses.
+func (g *GossipBroadcaster) SignWarningForTest(w *TopologyWarning) error {
+	return g.identity.SignWarning(w)
 }

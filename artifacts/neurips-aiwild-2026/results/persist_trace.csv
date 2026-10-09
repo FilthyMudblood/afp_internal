@@ -1,0 +1,3 @@
+experiment,arm,isolated,task_completed,probes,block_reason,leftover_depth,note
+persist,stale_probe,True,False,1,"recursion depth exceeded physical limit, intent loop detected",11,preflight without rewriting sidecar telemetry
+persist,fresh_s1,False,True,3,,0,new S1 reports its own depth starting at 0

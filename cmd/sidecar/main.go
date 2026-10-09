@@ -78,8 +78,13 @@ func main() {
 	if localDID == "" {
 		localDID = "did:afp:sidecar:local"
 	}
-
-	gossip := topology.NewGossipBroadcaster(localDID, store)
+	identity, err := topology.GenerateIdentity(localDID)
+	if err != nil {
+		slog.Error("failed to generate gossip identity", "error", err)
+		os.Exit(1)
+	}
+	gossip := topology.NewGossipBroadcaster(identity, store, topology.NewPublicKeyDirectory())
+	slog.Info("gossip identity ready", "local_did", identity.DID)
 	resolver := topology.NewResolver(store)
 
 	epochClock := func() uint64 {

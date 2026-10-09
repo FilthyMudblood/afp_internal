@@ -46,7 +46,7 @@
 
 | Item | Why | Notes |
 |------|-----|-------|
-| **P2P gossip transport** | Topology store exists; UDP/TCP broadcast TODO | Full topological quarantine at scale |
+| **P2P gossip transport** | Inbound ed25519 verify + unsigned drop **done**; UDP/TCP fan-out TODO | Full topological quarantine at scale |
 | **Open-exchange stranger tax** | Mode exists; hardening for untrusted peers | Collateral / probation FSM production paths |
 | **Formal verification** | Monte Carlo empirical proof exists | TLA+ / model-check ACC kernel bounds |
 
@@ -59,7 +59,7 @@
 | **CrewAI / AutoGen adapters** | Same SDK pattern as LangGraph |
 | **Argent Signaling Protocol (ASP) interop doc** | Position AFP relative to ASP and other application-layer protocols |
 | **SLO templates** | `afp_preflight_actions_total` → Grafana dashboards + alert rules |
-| **Whitepaper v2.0 Zenodo DOI** | Protocol Edition in repo: [`docs/whitepaper-v2/`](docs/whitepaper-v2/) · v1: [Zenodo](https://zenodo.org/records/20674352) |
+| **Whitepaper v2.0 Zenodo DOI** | Mixed Protocol Edition archived: [`../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md`](../AFP-Archived/mixed-whitepaper-v2/whitepaper-v2-protocol-edition.md) · v1: [Zenodo](https://zenodo.org/records/20674352) |
 
 ---
 
